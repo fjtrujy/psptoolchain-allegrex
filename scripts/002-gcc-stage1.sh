@@ -2,9 +2,9 @@
 # gcc-stage1.sh by Francisco Javier Trujillo Mata (fjtrujy@gmail.com)
 
 ## Download the source code.
-REPO_URL="https://github.com/pspdev/gcc.git"
+REPO_URL="https://github.com/fjtrujy/gcc.git"
 REPO_FOLDER="gcc"
-BRANCH_NAME="allegrex-v11.2.0"
+BRANCH_NAME="allegrex-v11.2.0-atomic"
 if test ! -d "$REPO_FOLDER"; then
 	git clone --depth 1 -b $BRANCH_NAME $REPO_URL $REPO_FOLDER && cd $REPO_FOLDER || { exit 1; }
 else
@@ -36,6 +36,7 @@ rm -rf mkdir build-$TARGET-stage1 && mkdir build-$TARGET-stage1 && cd build-$TAR
   --with-float=hard \
   --with-headers=no \
   --without-newlib \
+  --disable-libatomic \
   --disable-libssp \
   --disable-multilib \
   $TARG_XTRA_OPTS || { exit 1; }
