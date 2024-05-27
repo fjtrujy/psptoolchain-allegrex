@@ -1,5 +1,5 @@
 #!/bin/bash
-# 002-gcc-stage1.sh by pspdev developers
+# gcc-stage1 by pspdev developers
 
 ## Exit with code 1 when any command executed returns a non-zero exit code.
 onerr()
@@ -62,13 +62,17 @@ rm -rf mkdir build-$TARGET-stage1 && mkdir build-$TARGET-stage1 && cd build-$TAR
   --with-float=hard \
   --with-headers=no \
   --without-newlib \
-  --disable-libatomic \
+  --disable-libgcc \
+  --disable-shared \
+  --disable-threads \
   --disable-libssp \
-  --disable-multilib \
-  $TARG_XTRA_OPTS || { exit 1; }
+  --disable-libgomp \
+  --disable-libmudflap \
+  --disable-libquadmath \
+  $TARG_XTRA_OPTS
 
 ## Compile and install.
-make --quiet -j $PROC_NR clean          || { exit 1; }
-make --quiet -j $PROC_NR all            || { exit 1; }
-make --quiet -j $PROC_NR install-strip  || { exit 1; }
-make --quiet -j $PROC_NR clean          || { exit 1; }
+make --quiet -j $PROC_NR clean
+make --quiet -j $PROC_NR all-gcc
+make --quiet -j $PROC_NR install-gcc
+make --quiet -j $PROC_NR clean
