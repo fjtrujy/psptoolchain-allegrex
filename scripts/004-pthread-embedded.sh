@@ -52,6 +52,6 @@ cp ../../COPYING.* ../../README.md $PSPDEV/psp/share/licenses/pthread-embedded/
 ## Store build information
 BUILD_FILE="${PSPDEV}/build.txt"
 if [[ -f "${BUILD_FILE}" ]]; then
-  sed -i'' '/^pthread-embedded /d' "${BUILD_FILE}"
+  remove_line '^pthread-embedded ' "${BUILD_FILE}"
 fi
 git log -1 --format="pthread-embedded %H %cs %s" >> "${BUILD_FILE}"

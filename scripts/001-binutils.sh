@@ -35,16 +35,16 @@ cd "$REPO_FOLDER"
 TARGET="psp"
 TARG_XTRA_OPTS=""
 
-## If using MacOS Apple, set gmp and mpfr paths using TARG_XTRA_OPTS 
+## If using MacOS Apple, set gmp and mpfr paths using TARG_XTRA_OPTS
 ## (this is needed for Apple Silicon but we will do it for all MacOS systems)
 if [ "$(uname -s)" = "Darwin" ]; then
   ## Check if using brew
   if command -v brew &> /dev/null; then
-    TARG_XTRA_OPTS="--with-gmp=$(brew --prefix gmp) --with-mpfr=$(brew --prefix mpfr) --with-system-zlib"
-  fi
-  ## Check if using MacPorts
-  if command -v port &> /dev/null; then
-    TARG_XTRA_OPTS="--with-gmp=$(port -q prefix gmp) --with-mpfr=$(port -q prefix mpfr) --with-system-zlib"
+    TARG_XTRA_OPTS="--with-system-zlib --with-gmp=$(brew --prefix gmp) --with-mpfr=$(brew --prefix mpfr) --with-mpfr=$(brew --prefix mpfr)"
+  elif command -v port &> /dev/null; then
+    MACPORT_BASE=$(dirname $(port -q contents gmp|grep gmp.h)|sed s#/include##g)
+    printf 'Macport base is %s\n' "$MACPORT_BASE"
+    TARG_XTRA_OPTS="--with-system-zlib --with-libiconv_prefix=$MACPORT_BASE --with-gmp=$MACPORT_BASE --with-mpfr=$MACPORT_BASE --with-mpc=$MACPORT_BASE"
   fi
 fi
 
@@ -79,6 +79,6 @@ make --quiet -j $PROC_NR clean
 ## Store build information
 BUILD_FILE="${PSPDEV}/build.txt"
 if [[ -f "${BUILD_FILE}" ]]; then
-  sed -i'' '/^binutils /d' "${BUILD_FILE}"
+  remove_line '^binutils ' "${BUILD_FILE}"
 fi
 git log -1 --format="binutils %H %cs %s" >> "${BUILD_FILE}"

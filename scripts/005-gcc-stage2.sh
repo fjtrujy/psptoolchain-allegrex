@@ -37,16 +37,19 @@ TARGET="psp"
 ## Determine the maximum number of processes that Make can work with.
 PROC_NR=$(getconf _NPROCESSORS_ONLN)
 
-## If using MacOS Apple, set gmp, mpfr and mpc paths using TARG_XTRA_OPTS 
+## If using MacOS Apple, set gmp, mpfr and mpc paths using TARG_XTRA_OPTS
 ## (this is needed for Apple Silicon but we will do it for all MacOS systems)
 if [ "$(uname -s)" = "Darwin" ]; then
   ## Check if using brew
   if command -v brew &> /dev/null; then
-    TARG_XTRA_OPTS="--with-gmp=$(brew --prefix gmp) --with-mpfr=$(brew --prefix mpfr) --with-mpc=$(brew --prefix libmpc) --with-system-zlib"
-  fi
+    TARG_XTRA_OPTS="--with-system-zlib --with-gmp=$(brew --prefix gmp) --with-mpfr=$(brew --prefix mpfr) --with-mpc=$(brew --prefix libmpc)"
+    export PATH="$(brew --prefix gnu-sed)/libexec/gnubin:$PATH"
+  elif command -v port &> /dev/null; then
   ## Check if using MacPorts
-  if command -v port &> /dev/null; then
-    TARG_XTRA_OPTS="--with-gmp=$(port -q prefix gmp) --with-mpfr=$(port -q prefix mpfr) --with-mpc=$(port -q prefix libmpc) --with-system-zlib"
+    MACPORT_BASE=$(dirname $(port -q contents gmp|grep gmp.h)|sed s#/include##g)
+    printf 'Macport base is %s\n' "$MACPORT_BASE"
+    TARG_XTRA_OPTS="--with-system-zlib --with-libiconv_prefix=$MACPORT_BASE --with-gmp=$MACPORT_BASE --with-mpfr=$MACPORT_BASE --with-mpc=$MACPORT_BASE"
+    export PATH=$MACPORT_BASE/libexec/gnubin:$PATH
   fi
 fi
 
@@ -81,6 +84,6 @@ make --quiet -j $PROC_NR clean
 ## Store build information
 BUILD_FILE="${PSPDEV}/build.txt"
 if [[ -f "${BUILD_FILE}" ]]; then
-  sed -i'' '/^gcc /d' "${BUILD_FILE}"
+  remove_line '^gcc ' "${BUILD_FILE}"
 fi
 git log -1 --format="gcc %H %cs %s" >> "${BUILD_FILE}"

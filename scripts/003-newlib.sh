@@ -65,6 +65,6 @@ cp ../COPYING.NEWLIB $PSPDEV/psp/share/licenses/newlib/
 ## Store build information
 BUILD_FILE="${PSPDEV}/build.txt"
 if [[ -f "${BUILD_FILE}" ]]; then
-  sed -i'' '/^newlib /d' "${BUILD_FILE}"
+	remove_line '^newlib ' "${BUILD_FILE}"
 fi
 git log -1 --format="newlib %H %cs %s" >> "${BUILD_FILE}"
